@@ -4,25 +4,26 @@ using UnityEngine;
 
 public class Cherrie : MonoBehaviour
 {
-    private SpriteRenderer sptRenderer;
-    private CircleCollider2D crclCollider;
+    private SpriteRenderer sr;
+    private CircleCollider2D cc2d;
 
     public GameObject collected;
+    
     public int score;
 
     // Start is called before the first frame update
     void Start()
     {
-        sptRenderer = GetComponent<SpriteRenderer>();
-        crclCollider = GetComponent<CircleCollider2D>();
+        sr = GetComponent<SpriteRenderer>();
+        cc2d = GetComponent<CircleCollider2D>();
     }
 
     void OnTriggerEnter2D(Collider2D collider)
     {
         if(collider.gameObject.tag == "Player")
         {
-            sptRenderer.enabled = false;
-            crclCollider.enabled = false;
+            sr.enabled = false;
+            cc2d.enabled = false;
             collected.SetActive(true);
 
             GameController.instance.totalScore += score;

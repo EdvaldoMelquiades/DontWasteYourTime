@@ -4,20 +4,20 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    private Rigidbody2D rb2d;
+    private Animator anmt;
+
     public float moveSpeed;
     public float jumpForce;
 
     public bool isJumping;
     public bool doubleJump;
 
-    private Rigidbody2D rigbody;
-    private Animator anim;
-
     // Start is called before the first frame update
     void Start()
     {
-        rigbody = GetComponent<Rigidbody2D>();
-        anim = GetComponent<Animator>();
+        rb2d = GetComponent<Rigidbody2D>();
+        anmt = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -34,19 +34,19 @@ public class Player : MonoBehaviour
 
         if(Input.GetAxis("Horizontal") > 0f)
         {
-            anim.SetBool("Run", true);
+            anmt.SetBool("Run", true);
             transform.eulerAngles = new Vector3(0f, 0f, 0f);
         }
 
         if(Input.GetAxis("Horizontal") < 0f)
         {
-            anim.SetBool("Run", true);
+            anmt.SetBool("Run", true);
             transform.eulerAngles = new Vector3(0f, 180f, 0f);
         }
 
         if(Input.GetAxis("Horizontal") == 0f)
         {
-            anim.SetBool("Run", false);
+            anmt.SetBool("Run", false);
         }
     }
 
@@ -56,15 +56,15 @@ public class Player : MonoBehaviour
         {
             if(!isJumping)
             {
-                rigbody.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
+                rb2d.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
                 doubleJump = true;
-                anim.SetBool("Jump", true);
+                anmt.SetBool("Jump", true);
             }
             else
             {
                 if (doubleJump)
                 {
-                rigbody.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
+                rb2d.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
                 doubleJump = false;
                 }
             }
@@ -76,7 +76,7 @@ public class Player : MonoBehaviour
         if(collision.gameObject.layer == 8)
         {
             isJumping = false;
-            anim.SetBool("Jump", false);
+            anmt.SetBool("Jump", false);
         }
     }
 
