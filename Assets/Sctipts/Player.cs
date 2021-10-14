@@ -56,7 +56,8 @@ public class Player : MonoBehaviour
         {
             if(!isJumping)
             {
-                rb2d.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
+                //rb2d.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
+                rb2d.velocity = new Vector3(rb2d.velocity.x, jumpForce, 0f);
                 doubleJump = true;
                 anmt.SetBool("Jump", true);
             }
@@ -64,7 +65,8 @@ public class Player : MonoBehaviour
             {
                 if (doubleJump)
                 {
-                rb2d.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
+                //rb2d.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
+                rb2d.velocity = new Vector3(rb2d.velocity.x, jumpForce, 0f);
                 doubleJump = false;
                 }
             }
@@ -78,9 +80,21 @@ public class Player : MonoBehaviour
             isJumping = false;
             anmt.SetBool("Jump", false);
         }
+
+        if(collision.gameObject.tag == "Spike")
+        {
+            GameController.instance.ShowGameOver();
+            Destroy(gameObject);
+        }
+
+        if(collision.gameObject.tag == "Saw")
+        {
+            GameController.instance.ShowGameOver();
+            Destroy(gameObject);
+        }
     }
 
-     void OnCollisionExit2D(Collision2D collision)
+    void OnCollisionExit2D(Collision2D collision)
     {
         if(collision.gameObject.layer == 8)
         {
