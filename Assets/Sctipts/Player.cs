@@ -4,101 +4,101 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private Rigidbody2D rb2d;
-    private Animator anmt;
-
+    [SerializeField] private LayerMask groundLayerMask;
+    private Rigidbody2D rigidBody2d;
+    private Animator animator;
+    private CircleCollider2D circleCollider2D;
     public float moveSpeed;
     public float jumpForce;
+    public float moveInput;
+    public bool canDoubleJump;
+    private Transform playerPosition;
+    private Transform spawnPointPosition;
 
-    public bool isJumping;
-    public bool doubleJump;
-
-    // Start is called before the first frame update
-    void Start()
+    private void Awake ()
     {
-        rb2d = GetComponent<Rigidbody2D>();
-        anmt = GetComponent<Animator>();
+        rigidBody2d = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+        circleCollider2D = GetComponent<CircleCollider2D>();
+        playerPosition = GetComponent<Transform>();
+        spawnPointPosition = GameObject.FindGameObjectWithTag("Spawn").transform;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update ()
     {
-        Move();
-        Jump();
-    }
+        MovementAnimation();
 
-    void Move()
-    {
-        Vector3 movement = new Vector3(Input.GetAxis("Horizontal"), 0f, 0f);
-        transform.position += movement * Time.deltaTime * moveSpeed;
+        // Handle player movement
+        moveInput = Input.GetAxis("Horizontal");
+        rigidBody2d.velocity = new Vector2(moveInput * moveSpeed, rigidBody2d.velocity.y);
 
-        if(Input.GetAxis("Horizontal") > 0f)
+        // Set the double jump variable
+        if (IsGrounded())
         {
-            anmt.SetBool("Run", true);
-            transform.eulerAngles = new Vector3(0f, 0f, 0f);
+            canDoubleJump = true;
         }
-
-        if(Input.GetAxis("Horizontal") < 0f)
+        
+        // Handle player Jump
+        if (Input.GetButtonDown("Jump"))
         {
-            anmt.SetBool("Run", true);
-            transform.eulerAngles = new Vector3(0f, 180f, 0f);
-        }
-
-        if(Input.GetAxis("Horizontal") == 0f)
-        {
-            anmt.SetBool("Run", false);
-        }
-    }
-
-    void Jump()
-    {
-        if(Input.GetButtonDown("Jump"))
-        {
-            if(!isJumping)
+            if (IsGrounded())
             {
-                //rb2d.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
-                rb2d.velocity = new Vector3(rb2d.velocity.x, jumpForce, 0f);
-                doubleJump = true;
-                anmt.SetBool("Jump", true);
+                rigidBody2d.velocity = new Vector2(rigidBody2d.velocity.x, jumpForce);
             }
             else
             {
-                if (doubleJump)
+                if (canDoubleJump)
                 {
-                //rb2d.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
-                rb2d.velocity = new Vector3(rb2d.velocity.x, jumpForce, 0f);
-                doubleJump = false;
+                    rigidBody2d.velocity = new Vector2(rigidBody2d.velocity.x, jumpForce);
+                    canDoubleJump = false;
                 }
             }
         }
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
+    private void MovementAnimation ()
     {
-        if(collision.gameObject.layer == 8)
+        if(Input.GetAxis("Horizontal") > 0f)
         {
-            isJumping = false;
-            anmt.SetBool("Jump", false);
+            animator.SetBool("Run", true);
+            transform.eulerAngles = new Vector3(0f, 0f, 0f);
         }
 
+        if(Input.GetAxis("Horizontal") < 0f)
+        {
+            animator.SetBool("Run", true);
+            transform.eulerAngles = new Vector3(0f, 180f, 0f);
+        }
+
+        if(Input.GetAxis("Horizontal") == 0f)
+        {
+            animator.SetBool("Run", false);
+        }
+    }
+
+    // Move this part to theirs respective GameObjects scripts
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
         if(collision.gameObject.tag == "Spike")
         {
-            GameController.instance.ShowGameOver();
-            Destroy(gameObject);
+            PlayerRespawn();
         }
 
         if(collision.gameObject.tag == "Saw")
         {
-            GameController.instance.ShowGameOver();
-            Destroy(gameObject);
+            PlayerRespawn();
         }
     }
 
-    void OnCollisionExit2D(Collision2D collision)
+    private bool IsGrounded ()
     {
-        if(collision.gameObject.layer == 8)
-        {
-            isJumping = true;
-        }
+        Debug.DrawRay(transform.position, Vector2.down * 0.41f, Color.red);
+        RaycastHit2D raycastHit2D = Physics2D.Raycast(transform.position, Vector2.down, 0.41f, groundLayerMask);
+        return raycastHit2D.collider != null;
+    }
+
+    private void PlayerRespawn()
+    {
+        playerPosition.position = new Vector2(spawnPointPosition.position.x, spawnPointPosition.position.y);
     }
 }

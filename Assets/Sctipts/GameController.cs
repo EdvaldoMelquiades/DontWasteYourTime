@@ -6,32 +6,57 @@ using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
-    public int totalScore;
-    
-    public Text scoreText;
+    public static GameController instanceGameController;
+    public GameObject gameOverPanel;
+    public GameObject victoryPanel;
+    public Text timerUI;
+    [SerializeField] private float secondsRemaining = 19;
+    private string timeOutput;
+    public int itemCount = 0;
 
-    public GameObject gameOver;
-
-    public static GameController instance;
-
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
-        instance = this;
+        if (instanceGameController == null)
+        {
+            instanceGameController = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
-    public void UpdateScoreText()
+    private void Update()
     {
-        scoreText.text = totalScore.ToString();
+        UpdateCountdownTimer();
     }
 
     public void ShowGameOver()
     {
-        gameOver.SetActive(true);
+        gameOverPanel.SetActive(true);
+        Time.timeScale = 0;
+        itemCount = 0;
     }
 
-    public void RestartGame(string stageName)
+    public void RestartGame()
     {
-        SceneManager.LoadScene(stageName);
+        SceneManager.LoadScene("Stage1");
+        gameOverPanel.SetActive(false);
+        victoryPanel.SetActive(false);
+        Time.timeScale = 1;
+        secondsRemaining = 19;
+    }
+
+    private void UpdateCountdownTimer()
+    {
+        timeOutput = string.Format("{0:00}:{1:00}", secondsRemaining, (secondsRemaining * 100.0f) % 100.0f);
+        secondsRemaining -= Time.deltaTime;
+        timerUI.text = timeOutput;
+
+        if (secondsRemaining <= 0)
+        {
+            ShowGameOver();
+        }
     }
 }
